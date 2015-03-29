@@ -4,4 +4,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="sake_limit">Register your limit</string>
+    <string name="limit_row1">Species</string>
+    <string name="limit_row2">Your limit</string>
+    <string name="limit_row3">Update your limit</string>
 </resources>

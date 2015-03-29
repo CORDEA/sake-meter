@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,8 @@ import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,16 +29,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by CORDEA on 2015/03/29.
+ * Copyright [2015] [Yoshihiro Tanaka]
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Author: Yoshihiro Tanaka<contact@cordea.jp>
+ * Date  : 2015/03/29
  */
+
 public class SakeLimitActivity extends ActionBarActivity implements View.OnClickListener {
+    private int height = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sakelimit);
 
-        addTableRow();
+
 
         final Button button = (Button) findViewById(R.id.register_b);
         button.setOnClickListener(this);
@@ -45,7 +64,6 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.register_b :
-                Intent intent = new Intent(this, jp.cordea.sakemeter.SakeMeterActivity.class);
                 writeCache(false);
                 addTableRow();
             break;
@@ -60,23 +78,29 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
 
         removeRows();
 
-        for (Map.Entry<String, String> map : hashMap.entrySet()) {
+        for (String sake : general.sakeArray) {
             Log.i("addTableRow", findViewById(R.id.limit_table).toString());
 
             TextView sake_tv        = new TextView(this);
             TextView limit_tv       = new TextView(this);
             TextView[] tvArray      = {sake_tv, limit_tv};
 
-            String  sake   = map.getKey();
-            String  limit  = map.getValue();
+            String limit = "0";
+            if (hashMap.containsKey(sake)) limit = hashMap.get(sake);
 
             for (TextView tv : tvArray) {
                 tv.setPadding(padding + 10, padding, padding + 10, padding);
-                tv.setTextSize(20);
+                //tv.setBackgroundResource(R.drawable.border);
+                tv.setHeight(height);
+                tv.setTextSize(18);
             }
+            Log.i("addTableRow", Integer.toString(sake_tv.getHeight()));
 
             EditText et = new EditText(this);
             et.setInputType(InputType.TYPE_CLASS_NUMBER);
+               et.setHeight(height);
+            et.setPadding(padding, padding, padding + 10, padding);
+            //et.setBackgroundResource(R.drawable.border);
 
             sake_tv.setText(sake);
             limit_tv.setText(limit);
@@ -88,6 +112,7 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
             tableRow.addView(sake_tv);
             tableRow.addView(limit_tv);
             tableRow.addView(et);
+            tableRow.setGravity(Gravity.CENTER_HORIZONTAL);
             Log.i("addTableRow", sake + ": " + limit);
 
             tableLayout.addView(tableRow);
@@ -97,7 +122,7 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     private void removeRows() {
         TableLayout tableLayout = (TableLayout)findViewById(R.id.limit_table);
 
-        int count = (int) tableLayout.getChildCount();
+        int count = tableLayout.getChildCount();
         for (int k = 1; k < count; k++) {
             tableLayout.removeViewAt(1);
         }
@@ -105,10 +130,9 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
 
     public HashMap<String, String> writeCache(boolean flag) {
         HashMap<String, String> hashMap = new HashMap<String, String>();
-        String[] sakeArray = {"Beer", "Wine", "Sake"};
 
         if (flag) {
-            for (String str : sakeArray) {
+            for (String str : general.sakeArray) {
                 hashMap.put(str, "0");
             }
         } else {
@@ -138,7 +162,7 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
         HashMap<String, String> hashMap = new HashMap<String, String>();
         TableLayout tl = (TableLayout)findViewById(R.id.limit_table);
 
-        int count = (int) tl.getChildCount();
+        int count = tl.getChildCount();
         for (int k = 1; k < count; k++) {
             TableRow tr = (TableRow) tl.getChildAt(k);
             TextView sake_tv    = (TextView) tr.getChildAt(0);
@@ -148,8 +172,14 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
         return hashMap;
     }
 
-    private void recSakeLimit() {
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
 
+        TextView tv = (TextView) findViewById(R.id.species);
+        height = tv.getHeight();
+        Log.i("onWindowFocusChanged", Integer.toString(height));
+
+        addTableRow();
     }
 
     @Override

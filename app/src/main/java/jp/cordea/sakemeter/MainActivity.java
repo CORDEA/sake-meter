@@ -9,6 +9,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+/**
+ * Copyright [2015] [Yoshihiro Tanaka]
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Author: Yoshihiro Tanaka<contact@cordea.jp>
+ * Date  : 2015/03/29
+ */
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
 
@@ -17,10 +34,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button sakemeter_b = (Button) findViewById(R.id.sakemeter_b);
+        final Button meter_b = (Button) findViewById(R.id.sakemeter_b);
         final Button limit_b = (Button) findViewById(R.id.limit_b);
 
-        sakemeter_b.setOnClickListener(this);
+        meter_b.setOnClickListener(this);
         limit_b.setOnClickListener(this);
     }
 
@@ -29,12 +46,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         Intent intent;
         switch (view.getId()) {
             case R.id.sakemeter_b :
-                Log.i("INFO", "enter sakeMeter");
+                Log.i("MainActivity.onClick", "enter sakeMeter");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeMeterActivity.class);
                 startActivity(intent);
             break;
             case R.id.limit_b :
-                Log.i("INFO", "enter sakeLimit");
+                Log.i("MainActivity.onClick", "enter sakeLimit");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeLimitActivity.class);
                 startActivity(intent);
             break;

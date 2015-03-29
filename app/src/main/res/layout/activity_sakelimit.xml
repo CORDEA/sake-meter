@@ -15,38 +15,42 @@
         android:layout_marginBottom="50dp" />
 
     <TableLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:id="@+id/limit_table">
 
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Species"
-                android:id="@+id/textView4"
-                android:padding="10dp" />
+                android:text="@string/limit_row1"
+                android:id="@+id/species"
+                android:padding="10dp"
+                android:textSize="18dp" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="your limit"
+                android:text="@string/limit_row2"
                 android:id="@+id/textView3"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:textSize="18dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Update your limit"
+                android:text="@string/limit_row3"
                 android:id="@+id/textView5"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:textSize="18dp" />
 
         </TableRow>
     </TableLayout>
@@ -57,5 +61,6 @@
         android:text="Register"
         android:id="@+id/register_b"
         android:layout_gravity="right"
-        android:typeface="serif" />
+        android:typeface="serif"
+        android:layout_marginTop="30dp" />
 </LinearLayout>

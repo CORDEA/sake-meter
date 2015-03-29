@@ -1,6 +1,7 @@
 package jp.cordea.sakemeter;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -16,6 +17,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by CORDEA on 2015/03/29.
@@ -49,11 +53,12 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
     }
 
     private void addTableRow(String sake, int[] intArray) {
+        HashMap<String, Integer> hashMap = convertHashMap(controlCache.readCache(getCacheDir()));
+
         int count = intArray[0];
         int index = intArray[1];
 
         TableLayout tableLayout = (TableLayout)findViewById(R.id.sake_log);
-        //setContentView(tableLayout);
 
         int padding = 10;
         TextView sake_tv    = new TextView(this);
@@ -70,7 +75,15 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         pad_tv.setText(" : ");
         ++count;
         count_tv.setText(Integer.toString(count));
-
+        if (hashMap.containsKey(sake)) {
+            int limit = hashMap.get(sake);
+            if (count == limit)  sake_tv.setTextColor(Color.YELLOW);
+            if (count > limit + 2) {
+                sake_tv.setTextColor(Color.RED);
+                sake_tv.setTextSize(sake_tv.getTextSize() + 5);
+            }
+            if (count >  limit)  sake_tv.setTextColor(Color.RED);
+        }
         TableRow tableRow = new TableRow(this);
         TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
         tableRow.setLayoutParams(lp);
@@ -81,6 +94,14 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
         if (index != -1) tableLayout.removeViewAt(index);
         tableLayout.addView(tableRow);
+    }
+
+    private HashMap<String, Integer> convertHashMap(HashMap<String, String> hashMap) {
+        HashMap<String, Integer> convertHashMap = new HashMap<String, Integer>();
+        for (Map.Entry<String, String> map : hashMap.entrySet()) {
+            convertHashMap.put(map.getKey(), (Integer.parseInt(map.getValue())));
+        }
+        return convertHashMap;
     }
 
     private int[] loopSake(String sake) {

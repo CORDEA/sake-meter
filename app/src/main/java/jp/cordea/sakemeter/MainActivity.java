@@ -29,10 +29,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         Intent intent;
         switch (view.getId()) {
             case R.id.sakemeter_b :
-                Log.i("INFO", "enter sakemeter");
+                Log.i("INFO", "enter sakeMeter");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeMeterActivity.class);
                 startActivity(intent);
+            break;
             case R.id.limit_b :
+                Log.i("INFO", "enter sakeLimit");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeLimitActivity.class);
                 startActivity(intent);
             break;

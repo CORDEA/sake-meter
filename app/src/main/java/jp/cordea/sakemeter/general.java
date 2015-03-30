@@ -21,7 +21,11 @@ import java.util.HashMap;
  */
 
 public class general {
-    public static String[] sakeArray = {"Beer", "Sake", "Wine", "Cocktail", "Liqueur", "Spirits", "Other"};
+    public static String[]  sakeArray = {"Beer", "Sake", "Wine", "Cocktail", "Liqueur", "Spirits", "Other"};
+
+    public static String    limitFile = "sakeMeter.limit.csv";
+    public static String    meterFile = "sakeMeter.meter.csv";
+
     public static HashMap<String, Integer> sakeMap() {
         HashMap<String, Integer> hashMap = new HashMap<>();
         int[] alcohol = {55, 150, 100, 150, 200, 400, 400};

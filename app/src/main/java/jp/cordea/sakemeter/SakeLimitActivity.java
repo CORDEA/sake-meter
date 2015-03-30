@@ -14,7 +14,12 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright [2015] [Yoshihiro Tanaka]
@@ -35,14 +40,13 @@ import java.util.HashMap;
  */
 
 public class SakeLimitActivity extends ActionBarActivity implements View.OnClickListener {
-    private int height = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sakelimit);
 
-
+        addTableRow();
 
         final Button button = (Button) findViewById(R.id.register_b);
         button.setOnClickListener(this);
@@ -52,14 +56,14 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.register_b :
-                controlCache.writeCache(false, getCacheDir(), "sakeMeter.limit.csv");
+                writeCache(false, getCacheDir(), general.limitFile);
                 addTableRow();
             break;
         }
     }
 
     private void addTableRow() {
-        HashMap<String, String> hashMap = controlCache.readCache(false, getCacheDir(), "sakeMeter.limit.csv");
+        HashMap<String, String> hashMap = controlCache.readCache(false, getCacheDir(), general.limitFile);
         TableLayout tableLayout = (TableLayout)findViewById(R.id.limit_table);
         int padding = 10;
         //setContentView(tableLayout);
@@ -79,14 +83,12 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
             for (TextView tv : tvArray) {
                 tv.setPadding(padding + 10, padding, padding + 10, padding);
                 //tv.setBackgroundResource(R.drawable.border);
-                tv.setHeight(height);
                 tv.setTextSize(18);
             }
             Log.i("addTableRow", Integer.toString(sake_tv.getHeight()));
 
             EditText et = new EditText(this);
             et.setInputType(InputType.TYPE_CLASS_NUMBER);
-               et.setHeight(height);
             et.setPadding(padding, padding, padding + 10, padding);
             //et.setBackgroundResource(R.drawable.border);
 
@@ -114,16 +116,56 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
         for (int k = 1; k < count; k++) tableLayout.removeViewAt(1);
     }
 
+    public HashMap<String, String> writeCache(boolean flag, File cacheDir, String fileName) {
+        HashMap<String, String> hashMap = new HashMap<>();
+        String acceptable = "0";
+
+        int index = -1;
+        if (fileName.contains("limit")) index = 0;
+
+        if (flag) for (String str : general.sakeArray) hashMap.put(str, Integer.toString(index));
+        else {
+            hashMap     = readRowItems();
+            acceptable  = calcTolerance(hashMap).toString();
+        }
+
+        try {
+            File file = new File(cacheDir.getAbsolutePath(), fileName);
+            FileOutputStream fos = new FileOutputStream(file);
+            try {
+                if (!file.exists()) file.createNewFile();
+                for (Map.Entry<String, String> hm : hashMap.entrySet()) {
+                    String content = hm.getKey() + "," + hm.getValue().toString() + ":";
+                    byte[] contentInBytes = content.getBytes();
+                    fos.write(contentInBytes);
+                    fos.flush();
+                    Log.i("writeCache", content);
+                }
+                fos.write(acceptable.getBytes());
+                fos.flush();
+                fos.close();
+            } catch (IOException e) {}
+        } catch (FileNotFoundException e) {}
+        return hashMap;
+    }
+
     public HashMap<String, String> readRowItems() {
         HashMap<String, String> hashMap = new HashMap<>();
-        TableLayout tl = (TableLayout)findViewById(R.id.limit_table);
+        TableLayout tl = (TableLayout) findViewById(R.id.limit_table);
 
         int count = tl.getChildCount();
         for (int k = 1; k < count; k++) {
-            TableRow tr         = (TableRow) tl.getChildAt(k);
-            TextView sake_tv    = (TextView) tr.getChildAt(0);
-            EditText limit_tv   = (EditText) tr.getChildAt(2);
-            hashMap.put(sake_tv.getText().toString(), limit_tv.getText().toString());
+            TableRow tr             = (TableRow) tl.getChildAt(k);
+            TextView sake_tv        = (TextView) tr.getChildAt(0);
+            TextView oldLimit_tv    = (TextView) tr.getChildAt(1);
+            EditText limit_tv       = (EditText) tr.getChildAt(2);
+            String   limit          = limit_tv.getText().toString();
+            int      oldLimit       = Integer.parseInt(oldLimit_tv.getText().toString());
+            if (limit_tv.length() == 0) {
+                if (oldLimit != 0)  limit = Integer.toString(oldLimit);
+                else                limit = "0";
+            }
+            hashMap.put(sake_tv.getText().toString(), limit);
         }
         return hashMap;
     }
@@ -138,16 +180,6 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
             if (acceptable < count * freq) acceptable = count * freq;
         }
         return acceptable;
-    }
-
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-
-        TextView tv = (TextView) findViewById(R.id.species);
-        height = tv.getHeight();
-        Log.i("onWindowFocusChanged", Integer.toString(height));
-
-        addTableRow();
     }
 
     @Override

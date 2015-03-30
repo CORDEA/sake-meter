@@ -62,5 +62,5 @@
         android:id="@+id/register_b"
         android:layout_gravity="right"
         android:typeface="serif"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="20dp" />
 </LinearLayout>

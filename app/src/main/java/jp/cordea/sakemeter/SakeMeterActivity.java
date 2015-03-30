@@ -38,7 +38,6 @@ import java.util.Map;
  */
 
 public class SakeMeterActivity extends ActionBarActivity implements View.OnClickListener {
-    private static final    String _LOG_TAG     = "SakeMeterVerbose";
     private static          int    acceptable   = 0;
 
     @Override
@@ -49,7 +48,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         addItems(general.sakeArray);
         tableInitialize();
 
-        acceptable = convertHashMap(controlCache.readCache(true, getCacheDir(), "sakeMeter.limit.csv")).get("acceptable");
+        acceptable = convertHashMap(controlCache.readCache(true, getCacheDir(), general.limitFile)).get("acceptable");
 
         final Button button = (Button) findViewById(R.id.sake_ok);
         button.setOnClickListener(this);
@@ -57,22 +56,20 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
     @Override
     public void onClick(View view) {
-        Log.i(_LOG_TAG, "onclick");
         switch (view.getId()) {
             case R.id.sake_ok :
                 Spinner sakeSpinner                 = (Spinner)findViewById(R.id.sake_spinner);
                 String  sake                        = sakeSpinner.getSelectedItem().toString();
-                HashMap<String, Integer> limitMap   = convertHashMap(controlCache.readCache(false, getCacheDir(), "sakeMeter.limit.csv"));
+                HashMap<String, Integer> limitMap   = convertHashMap(controlCache.readCache(false, getCacheDir(), general.limitFile));
 
                 addTableRow(limitMap, sake, loopSake());
-                Log.i(_LOG_TAG, "sake_ok push");
             break;
         }
     }
 
     private void tableInitialize() {
-        HashMap<String, Integer>    meterMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), "sakeMeter.meter.csv"));
-        HashMap<String, Integer>    limitMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), "sakeMeter.limit.csv"));
+        HashMap<String, Integer>    meterMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), general.meterFile));
+        HashMap<String, Integer>    limitMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), general.limitFile));
         HashMap<String, int[]>      hashMap     = new HashMap<>();
         int[] intArray = {-1, -1};
         for (String sake : meterMap.keySet()) {
@@ -87,7 +84,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
         int count = hashMap.get(sake)[0];
         int index = hashMap.get(sake)[1];
-        for (String str : hashMap.keySet()) Log.i(_LOG_TAG, str + ": " + Integer.toString(hashMap.get(str)[1]));
+        for (String str : hashMap.keySet()) Log.i("addTableRow", str + ": " + Integer.toString(hashMap.get(str)[1]));
 
         TableLayout tableLayout = (TableLayout)findViewById(R.id.sake_log);
 

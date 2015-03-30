@@ -3,7 +3,6 @@ package jp.cordea.sakemeter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,12 +47,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         Intent intent;
         switch (view.getId()) {
             case R.id.sakemeter_b :
-                Log.i("MainActivity.onClick", "enter sakeMeter");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeMeterActivity.class);
                 startActivity(intent);
             break;
             case R.id.limit_b :
-                Log.i("MainActivity.onClick", "enter sakeLimit");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeLimitActivity.class);
                 startActivity(intent);
             break;

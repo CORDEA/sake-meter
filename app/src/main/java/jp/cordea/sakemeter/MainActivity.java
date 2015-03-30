@@ -1,8 +1,8 @@
 package jp.cordea.sakemeter;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,9 +36,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         final Button meter_b = (Button) findViewById(R.id.sakemeter_b);
         final Button limit_b = (Button) findViewById(R.id.limit_b);
+        final Button cost_b = (Button) findViewById(R.id.cost_b);
 
         meter_b.setOnClickListener(this);
         limit_b.setOnClickListener(this);
+        cost_b.setOnClickListener(this);
     }
 
     @Override
@@ -53,6 +55,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             case R.id.limit_b :
                 Log.i("MainActivity.onClick", "enter sakeLimit");
                 intent = new Intent(this, jp.cordea.sakemeter.SakeLimitActivity.class);
+                startActivity(intent);
+            break;
+            case R.id.cost_b :
+                intent = new Intent(this, jp.cordea.sakemeter.SakeCostActivity.class);
                 startActivity(intent);
             break;
         }

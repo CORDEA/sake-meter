@@ -1,8 +1,8 @@
 package jp.cordea.sakemeter;
 
+import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.provider.CalendarContract;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -15,12 +15,9 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Copyright [2015] [Yoshihiro Tanaka]
@@ -41,7 +38,8 @@ import java.util.TimeZone;
  */
 
 public class SakeMeterActivity extends ActionBarActivity implements View.OnClickListener {
-    private static final String _LOG_TAG = "SakeMeterVerbose";
+    private static final    String _LOG_TAG     = "SakeMeterVerbose";
+    private static          int    acceptable   = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +47,9 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         setContentView(R.layout.activity_sakemeter);
 
         addItems(general.sakeArray);
+        tableInitialize();
+
+        acceptable = convertHashMap(controlCache.readCache(true, getCacheDir(), "sakeMeter.limit.csv")).get("acceptable");
 
         final Button button = (Button) findViewById(R.id.sake_ok);
         button.setOnClickListener(this);
@@ -59,20 +60,34 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         Log.i(_LOG_TAG, "onclick");
         switch (view.getId()) {
             case R.id.sake_ok :
-                Spinner sakeSpinner = (Spinner)findViewById(R.id.sake_spinner);
-                String  sake        = sakeSpinner.getSelectedItem().toString();
-                addTableRow(sake, loopSake(sake));
+                Spinner sakeSpinner                 = (Spinner)findViewById(R.id.sake_spinner);
+                String  sake                        = sakeSpinner.getSelectedItem().toString();
+                HashMap<String, Integer> limitMap   = convertHashMap(controlCache.readCache(false, getCacheDir(), "sakeMeter.limit.csv"));
+
+                addTableRow(limitMap, sake, loopSake());
                 Log.i(_LOG_TAG, "sake_ok push");
             break;
         }
     }
 
-    private void addTableRow(String sake, int[] intArray) {
-        Log.i("addTableRow", getTime());
-        HashMap<String, Integer> hashMap = convertHashMap(controlCache.readCache(getCacheDir()));
+    private void tableInitialize() {
+        HashMap<String, Integer>    meterMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), "sakeMeter.meter.csv"));
+        HashMap<String, Integer>    limitMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), "sakeMeter.limit.csv"));
+        HashMap<String, int[]>      hashMap     = new HashMap<>();
+        int[] intArray = {-1, -1};
+        for (String sake : meterMap.keySet()) {
+            intArray[0] = meterMap.get(sake);
+            hashMap.put(sake, intArray);
+        }
+        for (String sake : meterMap.keySet()) addTableRow(limitMap, sake, hashMap);
+    }
 
-        int count = intArray[0];
-        int index = intArray[1];
+    private void addTableRow(HashMap<String, Integer> limitMap, String sake, HashMap<String, int[]> hashMap) {
+        Log.i("addTableRow", hashMap.toString());
+
+        int count = hashMap.get(sake)[0];
+        int index = hashMap.get(sake)[1];
+        for (String str : hashMap.keySet()) Log.i(_LOG_TAG, str + ": " + Integer.toString(hashMap.get(str)[1]));
 
         TableLayout tableLayout = (TableLayout)findViewById(R.id.sake_log);
 
@@ -94,25 +109,44 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         ++count;
         count_tv.setText(Integer.toString(count));
         if (hashMap.containsKey(sake)) {
-            int limit = hashMap.get(sake);
+            int limit = limitMap.get(sake);
             for (TextView tv : tvArray) {
-                if          (count == limit)    tv.setTextColor(Color.BLUE);
-                else if     (count >  limit)    tv.setTextColor(Color.RED);
-                if          (count > limit + 2) tv.setTextSize(25);
+                if          (count == limit)        tv.setTextColor(Color.BLUE);
+                else if     (count >  limit)        tv.setTextColor(Color.RED);
+                if          (count >  limit + 2)    tv.setTextSize(25);
             }
         }
+
+        int limit = 0;
+        for (String s : hashMap.keySet()) limit += hashMap.get(s)[0] * general.sakeMap().get(s);
+        if  (limit > acceptable) pushAlert(limit);
+
         TableRow tableRow           = new TableRow(this);
         TableRow.LayoutParams lp    = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
         tableRow.setLayoutParams(lp);
 
         for (TextView tv : tvArray) tableRow.addView(tv);
+
         if (index != -1) tableLayout.removeViewAt(index);
         tableLayout.addView(tableRow);
     }
 
+    private void pushAlert(int limit) {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("WARNING")
+                .setMessage(
+                        "Registered limit: "    + Double.toString(acceptable / 10.0)    + " ml" + "\n" +
+                        "Current intake: "      + Double.toString(limit / 10.0)         + " ml"
+                )
+                .show();
+        // ref. http://stackoverflow.com/questions/6562924/changing-font-size-into-an-alertdialog
+        TextView textView = (TextView) dialog.findViewById(android.R.id.message);
+        textView.setTextSize(25);
+    }
+
     private String getTime() {
         Calendar c = Calendar.getInstance();
-        int[] times  = {c.get(Calendar.MONTH)+1, c.get(Calendar.DATE), c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)};
+        int[] times  = {c.get(Calendar.MONTH)+1, c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)};
         String time_str  = "";
         String delimiter;
         for (int i = 0; i < times.length; i++) {
@@ -134,25 +168,21 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         return convertHashMap;
     }
 
-    private int[] loopSake(String sake) {
-        TableLayout tl = (TableLayout)findViewById(R.id.sake_log);
-        int[] intArray  = {0, -1};
+    private HashMap<String, int[]> loopSake() {
+        HashMap<String, int[]> hashMap = new HashMap<>();
+        TableLayout tl = (TableLayout) findViewById(R.id.sake_log);
 
         int count = tl.getChildCount();
         for (int k = 0; k < count; k++) {
             TableRow tr = (TableRow) tl.getChildAt(k);
             // 1: sake name
-            TextView sake_tv = (TextView) tr.getChildAt(1);
-            if (sake == sake_tv.getText().toString()) {
-                // 3: count
-                TextView count_tv = (TextView) tr.getChildAt(3);
-                intArray[0] = Integer.parseInt(count_tv.getText().toString());
-                intArray[1] = k;
-                return intArray;
-            }
+            TextView sake_tv    = (TextView) tr.getChildAt(1);
+            TextView count_tv   = (TextView) tr.getChildAt(3);
+
+            int[] intArray = {Integer.parseInt(count_tv.getText().toString()), k};
+            hashMap.put(sake_tv.getText().toString(), intArray);
         }
-        Log.i(_LOG_TAG, Integer.toString(count));
-        return intArray;
+        return hashMap;
     }
 
     @Override

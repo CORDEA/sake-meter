@@ -1,5 +1,7 @@
 package jp.cordea.sakemeter;
 
+import java.util.HashMap;
+
 /**
  * Copyright [2015] [Yoshihiro Tanaka]
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,4 +22,10 @@ package jp.cordea.sakemeter;
 
 public class general {
     public static String[] sakeArray = {"Beer", "Sake", "Wine", "Cocktail", "Liqueur", "Spirits", "Other"};
+    public static HashMap<String, Integer> sakeMap() {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        int[] alcohol = {55, 150, 100, 150, 200, 400, 400};
+        for (int i = 0; i < sakeArray.length; i++) hashMap.put(sakeArray[i], alcohol[i]);
+        return hashMap;
+    }
 }

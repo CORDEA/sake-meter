@@ -1,7 +1,5 @@
 package jp.cordea.sakemeter;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
@@ -10,23 +8,13 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Copyright [2015] [Yoshihiro Tanaka]
@@ -64,14 +52,14 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.register_b :
-                writeCache(false);
+                controlCache.writeCache(false, getCacheDir(), "sakeMeter.limit.csv");
                 addTableRow();
             break;
         }
     }
 
     private void addTableRow() {
-        HashMap<String, String> hashMap = (HashMap<String, String>) controlCache.readCache(getCacheDir());
+        HashMap<String, String> hashMap = controlCache.readCache(false, getCacheDir(), "sakeMeter.limit.csv");
         TableLayout tableLayout = (TableLayout)findViewById(R.id.limit_table);
         int padding = 10;
         //setContentView(tableLayout);
@@ -123,53 +111,33 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
         TableLayout tableLayout = (TableLayout)findViewById(R.id.limit_table);
 
         int count = tableLayout.getChildCount();
-        for (int k = 1; k < count; k++) {
-            tableLayout.removeViewAt(1);
-        }
+        for (int k = 1; k < count; k++) tableLayout.removeViewAt(1);
     }
 
-    public HashMap<String, String> writeCache(boolean flag) {
-        HashMap<String, String> hashMap = new HashMap<String, String>();
-
-        if (flag) {
-            for (String str : general.sakeArray) {
-                hashMap.put(str, "0");
-            }
-        } else {
-            hashMap = readRowItems();
-        }
-
-        try {
-            File cacheDir = getCacheDir();
-            File file = new File(cacheDir.getAbsolutePath(), "sakeMeter.csv");
-            FileOutputStream fos = new FileOutputStream(file);
-            try {
-                if (!file.exists()) file.createNewFile();
-                for (Map.Entry<String, String> hm : hashMap.entrySet()) {
-                    String content = hm.getKey() + "," + hm.getValue().toString() + ":";
-                    byte[] contentInBytes = content.getBytes();
-                    fos.write(contentInBytes);
-                    fos.flush();
-                    Log.i("writeCache", content);
-                }
-                fos.close();
-            } catch (IOException e) {}
-        } catch (FileNotFoundException e) {}
-        return hashMap;
-    }
-
-    private HashMap<String, String> readRowItems() {
-        HashMap<String, String> hashMap = new HashMap<String, String>();
+    public HashMap<String, String> readRowItems() {
+        HashMap<String, String> hashMap = new HashMap<>();
         TableLayout tl = (TableLayout)findViewById(R.id.limit_table);
 
         int count = tl.getChildCount();
         for (int k = 1; k < count; k++) {
-            TableRow tr = (TableRow) tl.getChildAt(k);
+            TableRow tr         = (TableRow) tl.getChildAt(k);
             TextView sake_tv    = (TextView) tr.getChildAt(0);
             EditText limit_tv   = (EditText) tr.getChildAt(2);
             hashMap.put(sake_tv.getText().toString(), limit_tv.getText().toString());
         }
         return hashMap;
+    }
+
+    public Integer calcTolerance(HashMap<String, String> hashMap) {
+        HashMap<String, Integer> sakeMap = general.sakeMap();
+        int acceptable               = 0;
+        // ref. http://stackoverflow.com/questions/1066589/iterate-through-a-hashmap
+        for (String sake : hashMap.keySet()) {
+            int count = Integer.parseInt(hashMap.get(sake));
+            int freq  = sakeMap.get(sake);
+            if (acceptable < count * freq) acceptable = count * freq;
+        }
+        return acceptable;
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {

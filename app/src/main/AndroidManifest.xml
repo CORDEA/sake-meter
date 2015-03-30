@@ -17,22 +17,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SakeMeterActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:name=".SakeMeterActivity">
         </activity>
         <activity
-            android:name=".SakeLimitActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+        android:name=".SakeLimitActivity">
+        </activity>
+        <activity
+            android:name=".SakeCostActivity">
         </activity>
     </application>
 

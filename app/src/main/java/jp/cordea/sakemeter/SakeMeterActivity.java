@@ -165,7 +165,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
     }
 
     private HashMap<String, Integer> convertHashMap(HashMap<String, String> hashMap) {
-        HashMap<String, Integer> convertHashMap = new HashMap<String, Integer>();
+        HashMap<String, Integer> convertHashMap = new HashMap<>();
         for (Map.Entry<String, String> map : hashMap.entrySet()) convertHashMap.put(map.getKey(), (Integer.parseInt(map.getValue())));
         return convertHashMap;
     }
@@ -195,8 +195,8 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
     }
 
     private void addItems(String[] array) {
-        Spinner spinner = (Spinner) findViewById(R.id.sake_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, array);
+        Spinner                 spinner = (Spinner) findViewById(R.id.sake_spinner);
+        ArrayAdapter<String>    adapter = new CustomArrayAdapter(this, R.layout.spinner_item, array);
         spinner.setAdapter(adapter);
     }
 

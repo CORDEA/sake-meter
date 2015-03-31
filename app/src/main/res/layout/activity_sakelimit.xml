@@ -31,9 +31,12 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/limit_row1"
                 android:id="@+id/species"
-                android:padding="10dp"
-                android:textSize="18dp"
-                android:typeface="serif" />
+                android:textSize="@dimen/limit_table_text_size"
+                android:typeface="serif"
+                android:paddingTop="@dimen/limit_padding_tb"
+                android:paddingBottom="@dimen/limit_padding_tb"
+                android:paddingRight="@dimen/limit_padding_lr"
+                android:paddingLeft="@dimen/limit_padding_lr" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -41,9 +44,12 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/limit_row2"
                 android:id="@+id/textView3"
-                android:padding="10dp"
-                android:textSize="18dp"
-                android:typeface="serif" />
+                android:textSize="@dimen/limit_table_text_size"
+                android:typeface="serif"
+                android:paddingTop="@dimen/limit_padding_tb"
+                android:paddingBottom="@dimen/limit_padding_tb"
+                android:paddingRight="@dimen/limit_padding_lr"
+                android:paddingLeft="@dimen/limit_padding_lr" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -51,9 +57,12 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/limit_row3"
                 android:id="@+id/textView5"
-                android:padding="10dp"
-                android:textSize="18dp"
-                android:typeface="serif" />
+                android:textSize="@dimen/limit_table_text_size"
+                android:typeface="serif"
+                android:paddingTop="@dimen/limit_padding_tb"
+                android:paddingBottom="@dimen/limit_padding_tb"
+                android:paddingRight="@dimen/limit_padding_lr"
+                android:paddingLeft="@dimen/limit_padding_lr" />
 
         </TableRow>
     </TableLayout>

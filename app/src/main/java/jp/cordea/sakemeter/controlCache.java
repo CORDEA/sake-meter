@@ -31,10 +31,9 @@ public class controlCache {
         HashMap<String, String> hashMap = new HashMap<String, String>();
 
         try {
-            //File cacheDir = getCacheDir();
-            File file               = new File(cacheDir.getAbsolutePath(), fileName);
+            File            file    = new File(cacheDir.getAbsolutePath(), fileName);
             FileInputStream fis     = new FileInputStream(file);
-            StringBuilder builder   = new StringBuilder();
+            StringBuilder   builder = new StringBuilder();
 
             int content;
             try {

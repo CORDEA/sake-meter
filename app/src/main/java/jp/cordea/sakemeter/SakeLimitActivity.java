@@ -84,9 +84,9 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
             if (sakeMap.containsKey(sake)) limit = sakeMap.get(sake);
 
             for (TextView tv : tvArray) {
-                tv.setPadding(padding + 10, padding, padding + 10, padding);
+                tv.setPadding(padding, padding, padding + 10, padding);
                 //tv.setBackgroundResource(R.drawable.border);
-                tv.setTextSize(18);
+                tv.setTextSize(15);
                 tv.setTypeface(Typeface.SERIF);
             }
             Log.i("addTableRow", Integer.toString(sake_tv.getHeight()));
@@ -126,22 +126,12 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
         HashMap<String, String> hashMap = new HashMap<>();
 
         String  acceptable  = "0";
-        int     index       = -1;
 
-        if (fileName.contains("limit")) {
-            index = 0;
-            if (!flag) {
-                hashMap     = readRowItems();
-                acceptable  = calcTolerance(hashMap).toString();
-            }
-        } else {
-            SakeMeterActivity       sma         = new SakeMeterActivity();
-            HashMap<String, int[]>  sakeMap     = sma.loopSake();
-
-            for (String sake : sakeMap.keySet()) hashMap.put(sake, Integer.toString(sakeMap.get(sake)[0]));
+        if (flag) for (String sake : general.sakeArray) hashMap.put(sake, Integer.toString(0));
+        else {
+            hashMap     = readRowItems();
+            acceptable  = calcTolerance(hashMap).toString();
         }
-
-        if (flag) for (String sake : general.sakeArray) hashMap.put(sake, Integer.toString(index));
 
         try {
             File                file    = new File(cacheDir.getAbsolutePath(), fileName);

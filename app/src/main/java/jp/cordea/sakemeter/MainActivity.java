@@ -33,9 +33,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button meter_b = (Button) findViewById(R.id.sakemeter_b);
-        final Button limit_b = (Button) findViewById(R.id.limit_b);
-        final Button cost_b = (Button) findViewById(R.id.cost_b);
+        final Button meter_b    = (Button) findViewById(R.id.sakemeter_b);
+        final Button limit_b    = (Button) findViewById(R.id.limit_b);
+        final Button cost_b     = (Button) findViewById(R.id.cost_b);
 
         meter_b.setOnClickListener(this);
         limit_b.setOnClickListener(this);
@@ -60,7 +60,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             break;
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

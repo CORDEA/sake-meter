@@ -39,7 +39,8 @@ import java.util.Map;
  */
 
 public class SakeMeterActivity extends ActionBarActivity implements View.OnClickListener {
-    private static          int    acceptable   = 0;
+    private static  HashMap<String, int[]>  rowMap      = new HashMap<>();
+    private static  int                     acceptable  = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,38 +64,31 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
                 String  sake                        = sakeSpinner.getSelectedItem().toString();
                 HashMap<String, Integer> limitMap   = convertHashMap(controlCache.readCache(false, getCacheDir(), general.limitFile));
 
-                addTableRow(limitMap, sake, loopSake());
+                rowMap = loopSake();
+                addTableRow(limitMap, sake);
             break;
         }
     }
 
-    @Override
-    public void onStop() {
-        SakeLimitActivity sla = new SakeLimitActivity();
-        sla.writeCache(false, getCacheDir(), general.meterFile);
-    }
-
     private void tableInitialize() {
-        HashMap<String, Integer>    meterMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), general.meterFile));
         HashMap<String, Integer>    limitMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), general.limitFile));
         HashMap<String, int[]>      hashMap     = new HashMap<>();
 
         int[] intArray = {-1, -1};
-        for (String sake : meterMap.keySet()) {
-            intArray[0] = meterMap.get(sake);
-            hashMap.put(sake, intArray);
-        }
-        for (String sake : meterMap.keySet()) addTableRow(limitMap, sake, hashMap);
+        for (String sake : general.sakeArray) hashMap.put(sake, intArray);
+        rowMap = hashMap;
+        for (String sake : general.sakeArray) addTableRow(limitMap, sake);
     }
 
-    private void addTableRow(HashMap<String, Integer> limitMap, String sake, HashMap<String, int[]> hashMap) {
-        Log.i("addTableRow", hashMap.toString());
+    private void addTableRow(HashMap<String, Integer> limitMap, String sake) {
+        Log.i("addTableRow", rowMap.toString());
 
-        int count = hashMap.get(sake)[0];
-        int index = hashMap.get(sake)[1];
-        for (String str : hashMap.keySet()) Log.i("addTableRow", str + ": " + Integer.toString(hashMap.get(str)[1]));
+        int count   = rowMap.get(sake)[0];
+        int index   = rowMap.get(sake)[1];
 
-        TableLayout tableLayout = (TableLayout)findViewById(R.id.sake_log);
+        for (String str : rowMap.keySet()) Log.i("addTableRow", str + ": " + Integer.toString(rowMap.get(str)[1]));
+
+        TableLayout tableLayout = (TableLayout) findViewById(R.id.sake_log);
 
         int padding = 10;
 
@@ -106,7 +100,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
         for (TextView tv : tvArray) {
             tv.setPadding(padding+10, padding, padding+10, padding);
-            tv.setTextSize(25);
+            tv.setTextSize(20);
             tv.setTypeface(Typeface.SERIF);
         }
 
@@ -116,7 +110,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
         ++count;
         count_tv.setText(Integer.toString(count));
-        if (hashMap.containsKey(sake)) {
+        if (rowMap.containsKey(sake)) {
             int limit = limitMap.get(sake);
             for (TextView tv : tvArray) {
                 if          (count == limit)        tv.setTextColor(Color.BLUE);
@@ -126,7 +120,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         }
 
         int limit = 0;
-        for (String s : hashMap.keySet()) limit += hashMap.get(s)[0] * general.sakeVolMap().get(s) * general.sakeMap().get(s);
+        for (String s : rowMap.keySet()) limit += rowMap.get(s)[0] * general.sakeVolMap().get(s) * general.sakeMap().get(s);
         if  (limit > acceptable) pushAlert(limit);
 
         TableRow tableRow           = new TableRow(this);

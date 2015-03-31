@@ -1,5 +1,6 @@
 package jp.cordea.sakemeter;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
@@ -63,8 +64,9 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     }
 
     private void addTableRow() {
-        HashMap<String, String> hashMap = controlCache.readCache(false, getCacheDir(), general.limitFile);
-        TableLayout tableLayout = (TableLayout)findViewById(R.id.limit_table);
+        HashMap<String, String> sakeMap     = controlCache.readCache(false, getCacheDir(), general.limitFile);
+        TableLayout             tableLayout = (TableLayout) findViewById(R.id.limit_table);
+
         int padding = 10;
         //setContentView(tableLayout);
 
@@ -73,21 +75,24 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
         for (String sake : general.sakeArray) {
             Log.i("addTableRow", findViewById(R.id.limit_table).toString());
 
-            TextView sake_tv        = new TextView(this);
-            TextView limit_tv       = new TextView(this);
-            TextView[] tvArray      = {sake_tv, limit_tv};
+            TextView    sake_tv     = new TextView(this);
+            TextView    limit_tv    = new TextView(this);
+            TextView[]  tvArray     = {sake_tv, limit_tv};
 
             String limit = "0";
-            if (hashMap.containsKey(sake)) limit = hashMap.get(sake);
+
+            if (sakeMap.containsKey(sake)) limit = sakeMap.get(sake);
 
             for (TextView tv : tvArray) {
                 tv.setPadding(padding + 10, padding, padding + 10, padding);
                 //tv.setBackgroundResource(R.drawable.border);
                 tv.setTextSize(18);
+                tv.setTypeface(Typeface.SERIF);
             }
             Log.i("addTableRow", Integer.toString(sake_tv.getHeight()));
 
             EditText et = new EditText(this);
+
             et.setInputType(InputType.TYPE_CLASS_NUMBER);
             et.setPadding(padding, padding, padding + 10, padding);
             //et.setBackgroundResource(R.drawable.border);
@@ -97,12 +102,13 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
 
             TableRow tableRow           = new TableRow(this);
             TableRow.LayoutParams lp    = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
-            tableRow.setLayoutParams(lp);
 
+            tableRow.setLayoutParams(lp);
             tableRow.addView(sake_tv);
             tableRow.addView(limit_tv);
             tableRow.addView(et);
             tableRow.setGravity(Gravity.CENTER_HORIZONTAL);
+
             Log.i("addTableRow", sake + ": " + limit);
 
             tableLayout.addView(tableRow);
@@ -110,7 +116,7 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     }
 
     private void removeRows() {
-        TableLayout tableLayout = (TableLayout)findViewById(R.id.limit_table);
+        TableLayout tableLayout = (TableLayout) findViewById(R.id.limit_table);
 
         int count = tableLayout.getChildCount();
         for (int k = 1; k < count; k++) tableLayout.removeViewAt(1);
@@ -118,31 +124,40 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
 
     public HashMap<String, String> writeCache(boolean flag, File cacheDir, String fileName) {
         HashMap<String, String> hashMap = new HashMap<>();
-        String acceptable = "0";
 
-        int index = -1;
-        if (fileName.contains("limit")) index = 0;
+        String  acceptable  = "0";
+        int     index       = -1;
 
-        if (flag) for (String str : general.sakeArray) hashMap.put(str, Integer.toString(index));
-        else {
-            hashMap     = readRowItems();
-            acceptable  = calcTolerance(hashMap).toString();
+        if (fileName.contains("limit")) {
+            index = 0;
+            if (!flag) {
+                hashMap     = readRowItems();
+                acceptable  = calcTolerance(hashMap).toString();
+            }
+        } else {
+            SakeMeterActivity       sma         = new SakeMeterActivity();
+            HashMap<String, int[]>  sakeMap     = sma.loopSake();
+
+            for (String sake : sakeMap.keySet()) hashMap.put(sake, Integer.toString(sakeMap.get(sake)[0]));
         }
 
+        if (flag) for (String sake : general.sakeArray) hashMap.put(sake, Integer.toString(index));
+
         try {
-            File file = new File(cacheDir.getAbsolutePath(), fileName);
-            FileOutputStream fos = new FileOutputStream(file);
+            File                file    = new File(cacheDir.getAbsolutePath(), fileName);
+            FileOutputStream    fos     = new FileOutputStream(file);
             try {
                 if (!file.exists()) file.createNewFile();
                 for (Map.Entry<String, String> hm : hashMap.entrySet()) {
                     String content = hm.getKey() + "," + hm.getValue().toString() + ":";
                     byte[] contentInBytes = content.getBytes();
+
                     fos.write(contentInBytes);
                     fos.flush();
-                    Log.i("writeCache", content);
                 }
                 fos.write(acceptable.getBytes());
                 fos.flush();
+
                 fos.close();
             } catch (IOException e) {}
         } catch (FileNotFoundException e) {}
@@ -150,33 +165,38 @@ public class SakeLimitActivity extends ActionBarActivity implements View.OnClick
     }
 
     public HashMap<String, String> readRowItems() {
-        HashMap<String, String> hashMap = new HashMap<>();
-        TableLayout tl = (TableLayout) findViewById(R.id.limit_table);
+        HashMap<String, String> sakeMap = new HashMap<>();
+        TableLayout             tl      = (TableLayout) findViewById(R.id.limit_table);
 
         int count = tl.getChildCount();
         for (int k = 1; k < count; k++) {
             TableRow tr             = (TableRow) tl.getChildAt(k);
+
             TextView sake_tv        = (TextView) tr.getChildAt(0);
             TextView oldLimit_tv    = (TextView) tr.getChildAt(1);
             EditText limit_tv       = (EditText) tr.getChildAt(2);
+
             String   limit          = limit_tv.getText().toString();
             int      oldLimit       = Integer.parseInt(oldLimit_tv.getText().toString());
             if (limit_tv.length() == 0) {
                 if (oldLimit != 0)  limit = Integer.toString(oldLimit);
                 else                limit = "0";
             }
-            hashMap.put(sake_tv.getText().toString(), limit);
+            sakeMap.put(sake_tv.getText().toString(), limit);
         }
-        return hashMap;
+        return sakeMap;
     }
 
     public Integer calcTolerance(HashMap<String, String> hashMap) {
         HashMap<String, Integer> sakeMap = general.sakeMap();
-        int acceptable               = 0;
+
+        int acceptable = 0;
+
         // ref. http://stackoverflow.com/questions/1066589/iterate-through-a-hashmap
         for (String sake : hashMap.keySet()) {
             int count = Integer.parseInt(hashMap.get(sake));
             int freq  = sakeMap.get(sake);
+
             if (acceptable < count * freq) acceptable = count * freq;
         }
         return acceptable;

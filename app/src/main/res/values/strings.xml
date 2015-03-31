@@ -6,6 +6,6 @@
     <string name="sake_limit">Register your limit</string>
     <string name="sake_cost">View sake cost</string>
     <string name="limit_row1">Species</string>
-    <string name="limit_row2">Your limit</string>
+    <string name="limit_row2">Your limit (ml)</string>
     <string name="limit_row3">Update your limit</string>
 </resources>

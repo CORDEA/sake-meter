@@ -2,6 +2,7 @@ package jp.cordea.sakemeter;
 
 import android.app.AlertDialog;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -67,10 +68,17 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         }
     }
 
+    @Override
+    public void onStop() {
+        SakeLimitActivity sla = new SakeLimitActivity();
+        sla.writeCache(false, getCacheDir(), general.meterFile);
+    }
+
     private void tableInitialize() {
         HashMap<String, Integer>    meterMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), general.meterFile));
         HashMap<String, Integer>    limitMap    = convertHashMap(controlCache.readCache(false, getCacheDir(), general.limitFile));
         HashMap<String, int[]>      hashMap     = new HashMap<>();
+
         int[] intArray = {-1, -1};
         for (String sake : meterMap.keySet()) {
             intArray[0] = meterMap.get(sake);
@@ -89,6 +97,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         TableLayout tableLayout = (TableLayout)findViewById(R.id.sake_log);
 
         int padding = 10;
+
         TextView time_tv    = new TextView(this);
         TextView sake_tv    = new TextView(this);
         TextView pad_tv     = new TextView(this);
@@ -98,11 +107,13 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         for (TextView tv : tvArray) {
             tv.setPadding(padding+10, padding, padding+10, padding);
             tv.setTextSize(25);
+            tv.setTypeface(Typeface.SERIF);
         }
 
         time_tv.setText(getTime());
         sake_tv.setText(sake);
-        pad_tv.setText(" : ");
+        pad_tv.setText(": ");
+
         ++count;
         count_tv.setText(Integer.toString(count));
         if (hashMap.containsKey(sake)) {
@@ -115,7 +126,7 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
         }
 
         int limit = 0;
-        for (String s : hashMap.keySet()) limit += hashMap.get(s)[0] * general.sakeMap().get(s);
+        for (String s : hashMap.keySet()) limit += hashMap.get(s)[0] * general.sakeVolMap().get(s) * general.sakeMap().get(s);
         if  (limit > acceptable) pushAlert(limit);
 
         TableRow tableRow           = new TableRow(this);
@@ -143,9 +154,11 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
     private String getTime() {
         Calendar c = Calendar.getInstance();
-        int[] times  = {c.get(Calendar.MONTH)+1, c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)};
-        String time_str  = "";
-        String delimiter;
+
+        int[]   times       = {c.get(Calendar.MONTH)+1, c.get(Calendar.DATE), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)};
+        String  time_str    = "";
+        String  delimiter;
+
         for (int i = 0; i < times.length; i++) {
             if      (i == 0)    delimiter = "/";
             else if (i == 1)    delimiter = "-";
@@ -159,15 +172,13 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
 
     private HashMap<String, Integer> convertHashMap(HashMap<String, String> hashMap) {
         HashMap<String, Integer> convertHashMap = new HashMap<String, Integer>();
-        for (Map.Entry<String, String> map : hashMap.entrySet()) {
-            convertHashMap.put(map.getKey(), (Integer.parseInt(map.getValue())));
-        }
+        for (Map.Entry<String, String> map : hashMap.entrySet()) convertHashMap.put(map.getKey(), (Integer.parseInt(map.getValue())));
         return convertHashMap;
     }
 
-    private HashMap<String, int[]> loopSake() {
-        HashMap<String, int[]> hashMap = new HashMap<>();
-        TableLayout tl = (TableLayout) findViewById(R.id.sake_log);
+    public HashMap<String, int[]> loopSake() {
+        HashMap<String, int[]>  hashMap = new HashMap<>();
+        TableLayout             tl      = (TableLayout) findViewById(R.id.sake_log);
 
         int count = tl.getChildCount();
         for (int k = 0; k < count; k++) {
@@ -190,9 +201,8 @@ public class SakeMeterActivity extends ActionBarActivity implements View.OnClick
     }
 
     private void addItems(String[] array) {
-        Spinner spinner = (Spinner)findViewById(R.id.sake_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.spinner_item, array);
+        Spinner spinner = (Spinner) findViewById(R.id.sake_spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, array);
         spinner.setAdapter(adapter);
     }
 

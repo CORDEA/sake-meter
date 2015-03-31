@@ -28,7 +28,32 @@ public class general {
 
     public static HashMap<String, Integer> sakeMap() {
         HashMap<String, Integer> hashMap = new HashMap<>();
-        int[] alcohol = {55, 150, 100, 150, 200, 400, 400};
+        /**
+         * Beer     : 5.5   %
+         * Sake     : 15    %
+         * Wine     : 10    %
+         * Cocktail : 15    %
+         * Liqueur  : 20    %
+         * Spirits  : 40    %
+         * Other    : 30    %
+         */
+        int[] alcohol = {55, 150, 100, 150, 200, 400, 300};
+        for (int i = 0; i < sakeArray.length; i++) hashMap.put(sakeArray[i], alcohol[i]);
+        return hashMap;
+    }
+
+    public static HashMap<String, Integer> sakeVolMap() {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        /**
+         * Beer     : 350   ml
+         * Sake     : 180   ml
+         * Wine     : 125   ml (Full bottle: 750 ml)
+         * Cocktail : 150   ml
+         * Liqueur  : 50    ml
+         * Spirits  : 45    ml
+         * Other    : 30    ml
+         */
+        int[] alcohol = {350, 180, 125, 150, 50, 45, 30};
         for (int i = 0; i < sakeArray.length; i++) hashMap.put(sakeArray[i], alcohol[i]);
         return hashMap;
     }

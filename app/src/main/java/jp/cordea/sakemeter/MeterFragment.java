@@ -88,7 +88,7 @@ public class MeterFragment extends Fragment {
         button.setOnClickListener(view1 -> {
             String sake = (String) spinner.getSelectedItem();
             Realm realm = Realm.getInstance(getContext());
-            Drink updateTarget = realm.where(Drink.class).equalTo("date", new LocalDate().toString()).equalTo("sake", sake).findFirst();
+            Drink updateTarget = realm.where(Drink.class).equalTo("date", new LocalDate().toDate()).equalTo("sake", sake).findFirst();
 
             realm.beginTransaction();
             int limit = 0, vot = 1;
@@ -99,7 +99,7 @@ public class MeterFragment extends Fragment {
             }
 
             Drink drink = new Drink();
-            drink.setDate(new LocalDate().toString());
+            drink.setDate(new LocalDate().toDate());
             drink.setSake(sake);
             drink.setLimit(limit);
             drink.setVot(vot);
@@ -126,12 +126,11 @@ public class MeterFragment extends Fragment {
     private void invalidateGraph(HashMap<Sake, SakeInfo> sakeInfoHashMap) {
         Realm realm = Realm.getInstance(getContext());
 
-        RealmResults<Drink> drinks = realm.where(Drink.class).equalTo("date", new LocalDate().toString()).findAll();
+        RealmResults<Drink> drinks = realm.where(Drink.class).equalTo("date", new LocalDate().toDate()).findAll();
 
         float limitVol = 0;
         float nowVol = 0;
         for (Drink drink : drinks) {
-            Log.i("xxx", drink.toString());
             SakeInfo info = sakeInfoHashMap.get(Sake.valueOf(drink.getSake()));
             nowVol += (info.getAlcohol() / 100) * info.getVolume() * drink.getVot();
             limitVol += (info.getAlcohol() / 100) * info.getVolume() * drink.getLimit();

@@ -2,6 +2,7 @@
 <resources>
     <string name="meter_fragment_title">MeterFragment</string>
     <string name="edit_fragment_title">EditFragment</string>
+    <string name="detail_fragment_title">DetailFragment</string>
     <string name="button_ok">OK</string>
     <string name="dialog_title">Choose Your Limit</string>
 </resources>

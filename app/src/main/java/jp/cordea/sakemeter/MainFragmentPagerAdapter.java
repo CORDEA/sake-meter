@@ -28,13 +28,15 @@ public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
                 return MeterFragment.newInstance();
             case 1:
                 return EditFragment.newInstance();
+            case 2:
+                return DetailFragment.newInstance();
         }
         return null;
     }
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -44,6 +46,8 @@ public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
                 return context.getResources().getString(R.string.meter_fragment_title);
             case 1:
                 return context.getResources().getString(R.string.edit_fragment_title);
+            case 2:
+                return context.getResources().getString(R.string.detail_fragment_title);
         }
         return super.getPageTitle(position);
     }

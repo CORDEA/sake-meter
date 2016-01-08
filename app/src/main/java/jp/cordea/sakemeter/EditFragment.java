@@ -55,7 +55,7 @@ public class EditFragment extends Fragment {
         Realm realm = Realm.getInstance(getContext());
 
         for (String sake : SakeInfoUtils.getStringSakeList()) {
-            Drink drink = realm.where(Drink.class).equalTo("date", (new LocalDate()).toString()).equalTo("sake", sake).findFirst();
+            Drink drink = realm.where(Drink.class).equalTo("date", new LocalDate().toDate()).equalTo("sake", sake).findFirst();
             EditListItem editListItem = new EditListItem(sake, "", drink == null ? 0 : drink.getLimit());
             items.add(editListItem);
         }

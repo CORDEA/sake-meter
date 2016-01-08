@@ -1,5 +1,9 @@
 package jp.cordea.sakemeter.model;
 
+import org.joda.time.LocalDate;
+
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -8,7 +12,7 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Drink extends RealmObject {
 
-    private String date;
+    private Date date;
     private String sake;
     private int vot;
     private int limit;
@@ -37,11 +41,11 @@ public class Drink extends RealmObject {
         this.limit = limit;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 }

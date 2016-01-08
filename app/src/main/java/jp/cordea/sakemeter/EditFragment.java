@@ -72,7 +72,7 @@ public class EditFragment extends Fragment {
         listView.setOnItemClickListener(
                 (adapterView, view1, pos, l) ->
                         new AlertDialog.Builder(getContext())
-                                .setTitle("")
+                                .setTitle(R.string.dialog_title)
                                 .setItems(dialogItems,
                                         (dialogInterface, i) -> {
                                             adapter.onLimitChanged(pos, Integer.parseInt(dialogItems[i].toString()));

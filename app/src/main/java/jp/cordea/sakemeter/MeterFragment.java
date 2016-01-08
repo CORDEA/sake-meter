@@ -1,8 +1,13 @@
 package jp.cordea.sakemeter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +28,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import jp.cordea.sakemeter.model.Drink;
 import jp.cordea.sakemeter.model.Limit;
@@ -82,25 +86,46 @@ public class MeterFragment extends Fragment {
             String sake = (String) spinner.getSelectedItem();
             Realm realm = Realm.getInstance(getContext());
 
-            RealmQuery<Drink> query = realm.where(Drink.class).equalTo("sake", sake);
+            Drink updateTarget = realm.where(Drink.class).equalTo("sake", sake).findFirst();
 
             Drink drink = new Drink();
             drink.setSake(sake);
-            Drink q = query.findFirst();
-            drink.setVot(q == null ? 1 : q.getVot() + 1);
+            drink.setVot(updateTarget == null ? 1 : updateTarget.getVot() + 1);
 
             realm.executeTransaction(realm1 -> realm1.copyToRealmOrUpdate(drink));
             realm.close();
-            invalidateGraph();
+            invalidateGraph(sakeInfoHashMap);
         });
 
-        invalidateGraph();
+        invalidateGraph(sakeInfoHashMap);
         return view;
     }
 
-    private void invalidateGraph() {
+    private void showLimitExceedDialog() {
+        new AlertDialog
+                .Builder(getContext())
+                .setTitle("")
+                .setMessage("")
+                .setCancelable(true)
+                .show();
+    }
+
+    private void invalidateGraph(HashMap<Sake, SakeInfo> sakeInfoHashMap) {
         Realm realm = Realm.getInstance(getContext());
+
         RealmResults<Drink> drinks = realm.where(Drink.class).findAll();
+        RealmResults<Limit> limits = realm.where(Limit.class).findAll();
+
+        float limitVol = 0;
+        float nowVol = 0;
+        for (Limit limit : limits) {
+            SakeInfo info = sakeInfoHashMap.get(Sake.valueOf(limit.getSake()));
+            limitVol += info.getAlcohol() * info.getVolume();
+        }
+        for (Drink drink : drinks) {
+            SakeInfo info = sakeInfoHashMap.get(Sake.valueOf(drink.getSake()));
+            nowVol += info.getAlcohol() * info.getVolume();
+        }
 
         List<Entry> entryList = new ArrayList<>();
         List<String> labels = new ArrayList<>();
@@ -115,7 +140,20 @@ public class MeterFragment extends Fragment {
         PieData data = new PieData(labels, set);
 
         pieChart.setData(data);
+        pieChart.setCenterText(getCenterText(limitVol, nowVol));
         pieChart.invalidate();
+
+        if (limitVol <= nowVol) {
+            showLimitExceedDialog();
+        }
+    }
+
+    private SpannableString getCenterText(float limit, float now) {
+        SpannableString s = new SpannableString(String.format("Drink %.2f ml\nLimit %.2f ml", now, limit));
+        s.setSpan(new RelativeSizeSpan(1.5f), 0, 9 + (Float.toString(now).length() + 2), 0);
+        s.setSpan(new ForegroundColorSpan(Color.GRAY), 9 + (Float.toString(now).length() + 2), s.length(), 0);
+        s.setSpan(new RelativeSizeSpan(.9f), 9 + (Float.toString(now).length() + 2), s.length(), 0);
+        return s;
     }
 
     @Override

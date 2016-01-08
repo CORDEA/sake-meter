@@ -11,6 +11,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SakeInfo {
-    private int alcohol;
+    private float alcohol;
     private int volume;
 }

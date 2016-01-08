@@ -27,7 +27,7 @@ import rx.Observable;
 public class SakeInfoUtils {
 
     public static HashMap<Sake, SakeInfo> getSakeInfo() {
-        int[] alcohol = {55, 150, 100, 150, 200, 400, 300};
+        float[] alcohol = {5.5f, 15.0f, 10.0f, 15.0f, 20.0f, 40.0f, 30.0f};
         int[] volume = {350, 180, 125, 150, 50, 45, 30};
 
         HashMap<Sake, SakeInfo> sakeInfo = new HashMap<>();

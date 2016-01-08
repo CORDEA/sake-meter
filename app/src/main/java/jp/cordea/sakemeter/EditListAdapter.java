@@ -1,17 +1,21 @@
 package jp.cordea.sakemeter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import org.joda.time.LocalDate;
+
+import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
+import jp.cordea.sakemeter.model.Drink;
 import jp.cordea.sakemeter.model.EditListItem;
-import jp.cordea.sakemeter.model.Limit;
 
 /**
  * Created by Yoshihiro Tanaka on 16/01/07.
@@ -43,14 +47,28 @@ public class EditListAdapter extends ArrayAdapter<EditListItem> {
     }
 
     public void onLimitChanged(int position, int l) {
-        Limit limit = new Limit();
-        limit.setLimit(l);
-        limit.setSake(getItem(position).getTitle());
         Realm realm = Realm.getInstance(getContext());
-        realm.executeTransaction(realm1 -> realm1.copyToRealmOrUpdate(limit));
+        Drink updateTarget = realm.where(Drink.class).equalTo("date", new LocalDate().toString()).equalTo("sake", getItem(position).getTitle()).findFirst();
+
+        realm.beginTransaction();
+
+        int vot = 0;
+        if (updateTarget != null) {
+            vot = updateTarget.getVot();
+            updateTarget.removeFromRealm();
+        }
+
+        Drink drink = new Drink();
+        drink.setDate(new LocalDate().toString());
+        drink.setSake(getItem(position).getTitle());
+        drink.setVot(vot);
+        drink.setLimit(l);
+
+        realm.copyToRealm(drink);
+        realm.commitTransaction();
         realm.close();
 
-        getItem(position).setLimit(l);
+        editListItems.get(position).setLimit(l);
         notifyDataSetChanged();
     }
 

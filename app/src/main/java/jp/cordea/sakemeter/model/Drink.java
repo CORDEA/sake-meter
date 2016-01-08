@@ -8,9 +8,10 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Drink extends RealmObject {
 
-    @PrimaryKey
+    private String date;
     private String sake;
     private int vot;
+    private int limit;
 
     public String getSake() {
         return sake;
@@ -26,5 +27,21 @@ public class Drink extends RealmObject {
 
     public void setVot(int vot) {
         this.vot = vot;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

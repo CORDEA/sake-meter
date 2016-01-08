@@ -9,14 +9,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.joda.time.LocalDate;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import jp.cordea.sakemeter.model.Drink;
 import jp.cordea.sakemeter.model.EditListItem;
-import jp.cordea.sakemeter.model.Limit;
 import rx.Observable;
 
 
@@ -50,9 +53,10 @@ public class EditFragment extends Fragment {
 
         List<EditListItem> items = new ArrayList<>();
         Realm realm = Realm.getInstance(getContext());
+
         for (String sake : SakeInfoUtils.getStringSakeList()) {
-            Limit limit = realm.where(Limit.class).equalTo("sake", sake).findFirst();
-            EditListItem editListItem = new EditListItem(sake, "", limit == null ? 0 : limit.getLimit());
+            Drink drink = realm.where(Drink.class).equalTo("date", (new LocalDate()).toString()).equalTo("sake", sake).findFirst();
+            EditListItem editListItem = new EditListItem(sake, "", drink == null ? 0 : drink.getLimit());
             items.add(editListItem);
         }
         realm.close();

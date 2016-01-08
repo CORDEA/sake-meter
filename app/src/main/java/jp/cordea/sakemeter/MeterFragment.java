@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,10 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.joda.time.LocalDate;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,7 +34,6 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import jp.cordea.sakemeter.model.Drink;
-import jp.cordea.sakemeter.model.Limit;
 import jp.cordea.sakemeter.model.SakeInfo;
 import rx.Observable;
 
@@ -85,14 +88,24 @@ public class MeterFragment extends Fragment {
         button.setOnClickListener(view1 -> {
             String sake = (String) spinner.getSelectedItem();
             Realm realm = Realm.getInstance(getContext());
+            Drink updateTarget = realm.where(Drink.class).equalTo("date", new LocalDate().toString()).equalTo("sake", sake).findFirst();
 
-            Drink updateTarget = realm.where(Drink.class).equalTo("sake", sake).findFirst();
+            realm.beginTransaction();
+            int limit = 0, vot = 1;
+            if (updateTarget != null) {
+                limit = updateTarget.getLimit();
+                vot = updateTarget.getVot() + 1;
+                updateTarget.removeFromRealm();
+            }
 
             Drink drink = new Drink();
+            drink.setDate(new LocalDate().toString());
             drink.setSake(sake);
-            drink.setVot(updateTarget == null ? 1 : updateTarget.getVot() + 1);
+            drink.setLimit(limit);
+            drink.setVot(vot);
 
-            realm.executeTransaction(realm1 -> realm1.copyToRealmOrUpdate(drink));
+            realm.copyToRealm(drink);
+            realm.commitTransaction();
             realm.close();
             invalidateGraph(sakeInfoHashMap);
         });
@@ -113,18 +126,15 @@ public class MeterFragment extends Fragment {
     private void invalidateGraph(HashMap<Sake, SakeInfo> sakeInfoHashMap) {
         Realm realm = Realm.getInstance(getContext());
 
-        RealmResults<Drink> drinks = realm.where(Drink.class).findAll();
-        RealmResults<Limit> limits = realm.where(Limit.class).findAll();
+        RealmResults<Drink> drinks = realm.where(Drink.class).equalTo("date", new LocalDate().toString()).findAll();
 
         float limitVol = 0;
         float nowVol = 0;
-        for (Limit limit : limits) {
-            SakeInfo info = sakeInfoHashMap.get(Sake.valueOf(limit.getSake()));
-            limitVol += info.getAlcohol() * info.getVolume();
-        }
         for (Drink drink : drinks) {
+            Log.i("xxx", drink.toString());
             SakeInfo info = sakeInfoHashMap.get(Sake.valueOf(drink.getSake()));
-            nowVol += info.getAlcohol() * info.getVolume();
+            nowVol += (info.getAlcohol() / 100) * info.getVolume() * drink.getVot();
+            limitVol += (info.getAlcohol() / 100) * info.getVolume() * drink.getLimit();
         }
 
         List<Entry> entryList = new ArrayList<>();

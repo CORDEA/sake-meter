@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="meter_fragment_title">MeterFragment</string>
-    <string name="edit_fragment_title">EditFragment</string>
-    <string name="detail_fragment_title">DetailFragment</string>
+    <string name="meter_fragment_title">Check</string>
+    <string name="edit_fragment_title">Edit</string>
+    <string name="detail_fragment_title">Statistics</string>
     <string name="button_ok">OK</string>
     <string name="dialog_title">Choose Your Limit</string>
+    <string name="exceed_dialog_title">Exceeded Your Limit</string>
+    <string name="exceed_dialog_message">You have exceeded the set limit.</string>
 </resources>

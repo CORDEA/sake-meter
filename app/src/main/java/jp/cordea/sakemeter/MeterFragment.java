@@ -8,7 +8,6 @@ import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +24,6 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -107,7 +105,9 @@ public class MeterFragment extends Fragment {
             realm.copyToRealm(drink);
             realm.commitTransaction();
             realm.close();
-            invalidateGraph(sakeInfoHashMap);
+            if (invalidateGraph(sakeInfoHashMap)) {
+                showLimitExceedDialog();
+            }
         });
 
         invalidateGraph(sakeInfoHashMap);
@@ -117,13 +117,13 @@ public class MeterFragment extends Fragment {
     private void showLimitExceedDialog() {
         new AlertDialog
                 .Builder(getContext())
-                .setTitle("")
-                .setMessage("")
+                .setTitle(R.string.exceed_dialog_title)
+                .setMessage(R.string.exceed_dialog_message)
                 .setCancelable(true)
                 .show();
     }
 
-    private void invalidateGraph(HashMap<Sake, SakeInfo> sakeInfoHashMap) {
+    private boolean invalidateGraph(HashMap<Sake, SakeInfo> sakeInfoHashMap) {
         Realm realm = Realm.getInstance(getContext());
 
         RealmResults<Drink> drinks = realm.where(Drink.class).equalTo("date", new LocalDate().toDate()).findAll();
@@ -152,9 +152,7 @@ public class MeterFragment extends Fragment {
         pieChart.setCenterText(getCenterText(limitVol, nowVol));
         pieChart.invalidate();
 
-        if (limitVol <= nowVol) {
-            showLimitExceedDialog();
-        }
+        return limitVol < nowVol;
     }
 
     private SpannableString getCenterText(float limit, float now) {

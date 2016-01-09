@@ -48,7 +48,10 @@ public class EditListAdapter extends ArrayAdapter<EditListItem> {
 
     public void onLimitChanged(int position, int l) {
         Realm realm = Realm.getInstance(getContext());
-        Drink updateTarget = realm.where(Drink.class).equalTo("date", new LocalDate().toDate()).equalTo("sake", getItem(position).getTitle()).findFirst();
+        Drink updateTarget = realm.where(Drink.class)
+                .equalTo("date", new LocalDate().toDate())
+                .equalTo("sake", getItem(position).getTitle())
+                .findFirst();
 
         realm.beginTransaction();
 
